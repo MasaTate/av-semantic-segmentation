@@ -24,12 +24,14 @@ class SegMetrics:
         iou = torch.diag(hist) / (hist.sum(dim=0) + hist.sum(dim=1) - torch.diag(hist))
         mean_iou = torch.nanmean(iou)
         cls_iou = dict(zip(range(self.n_class), iou))
+        cls_iou_str = {str(k):v for k,v in cls_iou.items()}
         
         return {
             "Overall acc": acc,
             "Mean acc": acc_cls,
             "Mean IoU": mean_iou,
-            "Class IoU": cls_iou
+            "Class IoU": cls_iou,
+            "Class IoU Str": cls_iou_str
         }
         
     def reset(self):

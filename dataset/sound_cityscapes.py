@@ -101,7 +101,10 @@ class SoundCityscapes(data.Dataset):
             img_dir = os.path.join(self.images_dir, city)
             target_dir = os.path.join(self.targets_dir, city)
 
-            for file_name in os.listdir(img_dir):
+
+            for i, file_name in enumerate(os.listdir(img_dir)):
+                if i > 1 and self.split == "val":
+                    break
                 self.images.append(os.path.join(img_dir, file_name))
                 target_name = '{}_{}'.format(os.path.splitext(file_name)[0],
                                              self._get_target_suffix(self.mode, self.target_type))
@@ -110,9 +113,15 @@ class SoundCityscapes(data.Dataset):
                 number = os.path.splitext(os.path.basename(file_name))[0].split("_")[-1]
                 self.spectrogram_1.append(os.path.join(self.spectrogram_dir, city, "spectrograms", "Track"+str(sound_track[0]), number+".npy"))
                 self.spectrogram_2.append(os.path.join(self.spectrogram_dir, city, "spectrograms", "Track"+str(sound_track[1]), number+".npy"))
-
+                exist = os.path.exists(self.targets[-1]) and os.path.exists(self.mask[-1]) and os.path.exists(self.spectrogram_1[-1]) and os.path.exists(self.spectrogram_2[-1])
+                if not exist:
+                    self.images.pop(-1)
+                    self.targets.pop(-1)
+                    self.mask.pop(-1)
+                    self.spectrogram_1.pop(-1)
+                    self.spectrogram_2.pop(-1)
                 assert len(self.images) > 0
-                assert len(self.images) == len(self.targets)
+                assert len(self.images) == len(self.mask) == len(self.targets) == len(self.spectrogram_1) == len(self.spectrogram_2)
 
 
     @classmethod
@@ -126,9 +135,32 @@ class SoundCityscapes(data.Dataset):
                 if mask[i][j] != 0:
                     if len(np.where((cls.train_id_to_color == target[i][j]).all(axis=1))[0]) != 0:
                         train_id[i][j] = np.where((cls.train_id_to_color == target[i][j]).all(axis=1))[0][0]
-        train_id[train_id == len(cls.train_id_to_color)-1] = 255
+                        #print(train_id[i][j])
+        #train_id[train_id == len(cls.train_id_to_color)-1] = 255
+        #print("color encode")
+        #print(train_id[(train_id > 2) & (train_id != 255)])
+        train_id[train_id == 255] = len(cls.train_id_to_color) - 1
+        return torch.from_numpy(train_id)
 
-        return Image.fromarray(train_id)
+    @classmethod
+    def encode_color_fast(cls, target, mask):
+        target = np.array(target)
+        mask = np.array(mask)
+        assert target.shape[:2] == mask.shape
+        train_id = np.full((target.shape[0], target.shape[1]), 255, dtype=np.uint8)
+        color_dict = cls.train_id_to_color.sum(axis=1)
+        target = target.sum(axis=2)
+        for i in range(target.shape[0]):
+            for j in range(target.shape[1]):
+                if mask[i][j] != 0:
+                    if len(np.where((color_dict == target[i][j]))[0]) != 0:
+                        train_id[i][j] = np.where((color_dict == target[i][j]))[0][0]
+                        #print(train_id[i][j])
+        #train_id[train_id == len(cls.train_id_to_color)-1] = 255
+        train_id[train_id == 255] = len(cls.train_id_to_color) - 1
+        return torch.from_numpy(train_id)
+        
+
     
     @classmethod
     def encode_target(cls, target):
@@ -136,7 +168,7 @@ class SoundCityscapes(data.Dataset):
 
     @classmethod
     def decode_target(cls, target):
-        target[target == 255] = len(cls.train_id_to_color) - 1
+        #target[target == 255] = len(cls.train_id_to_color) - 1
         #target = target.astype('uint8') + 1
         return cls.train_id_to_color[target]
 
@@ -148,16 +180,22 @@ class SoundCityscapes(data.Dataset):
             tuple: (image, target) where target is a tuple of all target types if target_type is a list with more
             than one item. Otherwise target is a json object if target_type="polygon", else the image segmentation.
         """
+        #print("load")
         image = Image.open(self.images[index]).convert('RGB')
+        #image_black = Image.new("RGB", (3840, 1920))
         target = Image.open(self.targets[index]).convert('RGB')
         mask = Image.open(self.mask[index]).convert('L')
-        target = self.encode_color(target, mask)
         spec_1 = np.load(self.spectrogram_1[index])
         spec_2 = np.load(self.spectrogram_2[index])
-
+        #print("transform")
         if self.transform:
-            image, target = self.transform(image, target)
+            image, target, mask = self.transform(image, target, mask)
+            #image_black, target, mask = self.transform(image_black, target, mask)
         #target = self.encode_target(target)
+        #print("encode")
+        target = self.encode_color_fast(target, mask)
+        #print("check")
+        #print(target[(target > 2) & (target != 255)])
         return image, target, torch.from_numpy(spec_1), torch.from_numpy(spec_2)
 
     def __len__(self):

@@ -129,6 +129,6 @@ dmypy.json
 .pyre/
 
 # others
-result/
-logs/
-checkpoint/
+result*/
+logs*/
+checkpoint*/

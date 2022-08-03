@@ -43,7 +43,7 @@ def main():
     model = model.to(device)
 
     # optimizer
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-5)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.00005)
 
     # logging
     if not os.path.exists(cfg.LOG.DIR):
@@ -60,7 +60,8 @@ def main():
         print("created : "+cfg.RESULT.WEIGHT_PATH)
 
     # criterion
-    criterion = nn.CrossEntropyLoss(ignore_index=255, reduction='mean')
+    #criterion = nn.CrossEntropyLoss(ignore_index=255, reduction='mean')
+    criterion = nn.CrossEntropyLoss(reduction='mean')
 
     # metrics
     metrics = SegMetrics(cfg.DATASET.NUM_CLASSES, device)
@@ -76,7 +77,7 @@ def main():
             target = target.to(device, dtype=torch.long)
             audio_1 = audio_1.to(device, dtype=torch.float32)
             audio_2 = audio_2.to(device, dtype=torch.float32)
-            
+            #print("calc")
             optimizer.zero_grad()
 
             pred = model(audio_1, audio_2)
@@ -85,46 +86,51 @@ def main():
             # back prop
             loss.backward()
             optimizer.step()
-
+            #print("fin")
             if (i+1) % cfg.LOG.LOSS == 0:
                 np_loss = loss.detach().cpu().numpy()
                 writer.add_scalar('train_loss', np_loss, step + 1)
 
             if (i+1) % cfg.LOG.IMAGE == 0:
                 target_save = target[0].detach().cpu().numpy()
-                pred_save = pred[0].detach().max(dim=1)[1].cpu().numpy()[0]
+                pred_save = pred.detach().max(dim=1)[1].cpu().numpy()[0]
                 target_save = train_loader.dataset.decode_target(target_save).astype(np.uint8)
                 target_save = torch.from_numpy(target_save.astype(np.float32)).clone().permute(2, 0, 1)
-                pred_save = train_loader.dataset.decode_target(target_save).astype(np.uint8)
-                pred_save = torch.from_numpy(target_save.astype(np.float32)).clone().permute(2, 0, 1)
+                pred_save = train_loader.dataset.decode_target(pred_save).astype(np.uint8)
+                pred_save = torch.from_numpy(pred_save.astype(np.float32)).clone().permute(2, 0, 1)
                 writer.add_image('train_target', target_save, step + 1)
                 writer.add_image('train_pred', pred_save, step + 1)
 
             del target, audio_1, audio_2
 
+            if (step + 1) % cfg.RESULT.WEIGHT_ITER == 0:
+                print("saving weight...")
+                torch.save(model.state_dict(), cfg.RESULT.WEIGHT_PATH + f'/checkpoint_epoch{epoch}_iter{step + 1}.pth')
+            
             #TODO ずらす
-            if (epoch+1) % cfg.TRAIN.VAL_EPOCH == 0:
-                score = validation(val_loader, model, device, metrics, epoch, cfg.RESULT.PATH, cfg.RESULT.SAVE_NUM)
-                writer.add_scalar('val_mIoU', score["Mean IoU"], epoch + 1)
-                writer.add_scalars('val_class_IoU', score["Class IoU"], epoch + 1)
-
+            
+        if (epoch+1) % cfg.TRAIN.VAL_EPOCH == 0:
+            score = validation(val_loader, model, device, metrics, epoch, cfg.RESULT.PATH, cfg.RESULT.SAVE_NUM)
+            print(score)
+            writer.add_scalar('val_mIoU', score["Mean IoU"], epoch)
+            writer.add_scalars('val_class_IoU', score["Class IoU Str"], epoch)
+            
         torch.save(model.state_dict(), cfg.RESULT.WEIGHT_PATH + f'/checkpoint_epoch{epoch}.pth')
     writer.close()
 
 
 def validation(val_loader, model, device, metrics, epoch, results_path, save_num):
     model.eval()
-    print("eval")
+    print("======================evaluation======================")
     for i, (image, target, audio_1, audio_2) in enumerate(tqdm(val_loader)):
         with torch.no_grad():
-        
+            image = image.to(device, dtype=torch.float32)
             target = target.to(device, dtype=torch.long)
             audio_1 = audio_1.to(device, dtype=torch.float32)
             audio_2 = audio_2.to(device, dtype=torch.float32)
 
             pred = model(audio_1, audio_2)
             pred_label = pred.detach().max(dim=1)[1]
-            target = target.cpu().numpy()
 
             metrics.update(target, pred_label)
 
@@ -132,9 +138,9 @@ def validation(val_loader, model, device, metrics, epoch, results_path, save_num
             if save_num != 0 and i % (len(val_loader) // save_num) == 0:
                     image_save = image[0].detach().cpu().numpy()
                     target_save = target[0].cpu().numpy()
-                    pred_save = pred[0].cpu().numpy()
+                    pred_save = pred_label[0].cpu().numpy()
                     
-                    image_save = image_save.transpose(1, 2, 0).astype(np.uint8)
+                    image_save = (image_save*255).transpose(1, 2, 0).astype(np.uint8)
                     target_save = val_loader.dataset.decode_target(target_save).astype(np.uint8)
                     pred_save = val_loader.dataset.decode_target(pred_save).astype(np.uint8)
                     
