@@ -31,33 +31,33 @@ class SoundCityscapes(data.Dataset):
         CityscapesClass('static',               4, 255, 'void', 0, False, True, (0, 0, 0)),
         CityscapesClass('dynamic',              5, 255, 'void', 0, False, True, (111, 74, 0)),
         CityscapesClass('ground',               6, 255, 'void', 0, False, True, (81, 0, 81)),
-        CityscapesClass('road',                 7, 255, 'flat', 1, False, False, (128, 64, 128)), #train_id = 0
-        CityscapesClass('sidewalk',             8, 255, 'flat', 1, False, False, (244, 35, 232)), #train_id = 1
+        CityscapesClass('road',                 7, 0, 'flat', 1, False, False, (128, 64, 128)), #train_id = 0
+        CityscapesClass('sidewalk',             8, 1, 'flat', 1, False, False, (244, 35, 232)), #train_id = 1
         CityscapesClass('parking',              9, 255, 'flat', 1, False, True, (250, 170, 160)),
         CityscapesClass('rail track',           10, 255, 'flat', 1, False, True, (230, 150, 140)),
-        CityscapesClass('building',             11, 255, 'construction', 2, False, False, (70, 70, 70)), #train_id = 2
-        CityscapesClass('wall',                 12, 255, 'construction', 2, False, False, (102, 102, 156)), #train_id = 3
-        CityscapesClass('fence',                13, 255, 'construction', 2, False, False, (190, 153, 153)), #train_id = 4
+        CityscapesClass('building',             11, 2, 'construction', 2, False, False, (70, 70, 70)), #train_id = 2
+        CityscapesClass('wall',                 12, 3, 'construction', 2, False, False, (102, 102, 156)), #train_id = 3
+        CityscapesClass('fence',                13, 4, 'construction', 2, False, False, (190, 153, 153)), #train_id = 4
         CityscapesClass('guard rail',           14, 255, 'construction', 2, False, True, (180, 165, 180)),
         CityscapesClass('bridge',               15, 255, 'construction', 2, False, True, (150, 100, 100)),
         CityscapesClass('tunnel',               16, 255, 'construction', 2, False, True, (150, 120, 90)),
-        CityscapesClass('pole',                 17, 255, 'object', 3, False, False, (153, 153, 153)), #train_id = 5
+        CityscapesClass('pole',                 17, 5, 'object', 3, False, False, (153, 153, 153)), #train_id = 5
         CityscapesClass('polegroup',            18, 255, 'object', 3, False, True, (153, 153, 153)),
-        CityscapesClass('traffic light',        19, 255, 'object', 3, False, False, (250, 170, 30)), #train_id = 6
-        CityscapesClass('traffic sign',         20, 255, 'object', 3, False, False, (220, 220, 0)), #train_id = 7
-        CityscapesClass('vegetation',           21, 255, 'nature', 4, False, False, (107, 142, 35)), #train_id = 8
-        CityscapesClass('terrain',              22, 255, 'nature', 4, False, False, (152, 251, 152)), #train_id = 9
-        CityscapesClass('sky',                  23, 255, 'sky', 5, False, False, (70, 130, 180)), #train_id = 10
-        CityscapesClass('person',               24, 255, 'human', 6, True, False, (220, 20, 60)), #train_id = 11
-        CityscapesClass('rider',                25, 255, 'human', 6, True, False, (255, 0, 0)), #train_id = 12
-        CityscapesClass('car',                  26, 0, 'vehicle', 7, True, False, (0, 0, 142)), #train_id = 13
-        CityscapesClass('truck',                27, 255, 'vehicle', 7, True, False, (0, 0, 70)), #train_id = 14
-        CityscapesClass('bus',                  28, 255, 'vehicle', 7, True, False, (0, 60, 100)), #train_id = 15
+        CityscapesClass('traffic light',        19, 6, 'object', 3, False, False, (250, 170, 30)), #train_id = 6
+        CityscapesClass('traffic sign',         20, 7, 'object', 3, False, False, (220, 220, 0)), #train_id = 7
+        CityscapesClass('vegetation',           21, 8, 'nature', 4, False, False, (107, 142, 35)), #train_id = 8
+        CityscapesClass('terrain',              22, 9, 'nature', 4, False, False, (152, 251, 152)), #train_id = 9
+        CityscapesClass('sky',                  23, 10, 'sky', 5, False, False, (70, 130, 180)), #train_id = 10
+        CityscapesClass('person',               24, 11, 'human', 6, True, False, (220, 20, 60)), #train_id = 11
+        CityscapesClass('rider',                25, 12, 'human', 6, True, False, (255, 0, 0)), #train_id = 12
+        CityscapesClass('car',                  26, 13, 'vehicle', 7, True, False, (0, 0, 142)), #train_id = 13
+        CityscapesClass('truck',                27, 14, 'vehicle', 7, True, False, (0, 0, 70)), #train_id = 14
+        CityscapesClass('bus',                  28, 15, 'vehicle', 7, True, False, (0, 60, 100)), #train_id = 15
         CityscapesClass('caravan',              29, 255, 'vehicle', 7, True, True, (0, 0, 90)),
         CityscapesClass('trailer',              30, 255, 'vehicle', 7, True, True, (0, 0, 110)),
-        CityscapesClass('train',                31, 1, 'vehicle', 7, True, False, (0, 80, 100)), #train_id = 16
-        CityscapesClass('motorcycle',           32, 2, 'vehicle', 7, True, False, (0, 0, 230)), #train_id = 17
-        CityscapesClass('bicycle',              33, 255, 'vehicle', 7, True, False, (119, 11, 32)), #train_id = 18
+        CityscapesClass('train',                31, 16, 'vehicle', 7, True, False, (0, 80, 100)), #train_id = 16
+        CityscapesClass('motorcycle',           32, 17, 'vehicle', 7, True, False, (0, 0, 230)), #train_id = 17
+        CityscapesClass('bicycle',              33, 18, 'vehicle', 7, True, False, (119, 11, 32)), #train_id = 18
         CityscapesClass('license plate',        -1, 255, 'vehicle', 7, False, True, (0, 0, 142)), 
     ]
 
@@ -133,8 +133,9 @@ class SoundCityscapes(data.Dataset):
         for i in range(target.shape[0]):
             for j in range(target.shape[1]):
                 if mask[i][j] != 0:
-                    if len(np.where((cls.train_id_to_color == target[i][j]).all(axis=1))[0]) != 0:
-                        train_id[i][j] = np.where((cls.train_id_to_color == target[i][j]).all(axis=1))[0][0]
+                    train_index = np.where((cls.train_id_to_color == target[i][j]).all(axis=1))[0]
+                    if len(train_index) != 0:
+                        train_id[i][j] = train_index[0]
                         #print(train_id[i][j])
         #train_id[train_id == len(cls.train_id_to_color)-1] = 255
         #print("color encode")
@@ -153,11 +154,19 @@ class SoundCityscapes(data.Dataset):
         for i in range(target.shape[0]):
             for j in range(target.shape[1]):
                 if mask[i][j] != 0:
-                    if len(np.where((color_dict == target[i][j]))[0]) != 0:
-                        train_id[i][j] = np.where((color_dict == target[i][j]))[0][0]
+                    train_index = np.where((color_dict == target[i][j]))[0]
+                    if len(train_index) != 0:
+                        
+                        if train_index in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 18]:
+                            train_id[i][j] = 255
+                        else:
+                            train_id[i][j] = train_index[0]
+                        """
+                        train_id[i][j] = train_index[0]
+                        """
                         #print(train_id[i][j])
         #train_id[train_id == len(cls.train_id_to_color)-1] = 255
-        train_id[train_id == 255] = len(cls.train_id_to_color) - 1
+        #train_id[train_id == 255] = len(cls.train_id_to_color) - 1
         return torch.from_numpy(train_id)
         
 
@@ -168,7 +177,7 @@ class SoundCityscapes(data.Dataset):
 
     @classmethod
     def decode_target(cls, target):
-        #target[target == 255] = len(cls.train_id_to_color) - 1
+        target[target == 255] = len(cls.train_id_to_color) - 1
         #target = target.astype('uint8') + 1
         return cls.train_id_to_color[target]
 
@@ -191,11 +200,17 @@ class SoundCityscapes(data.Dataset):
         if self.transform:
             image, target, mask = self.transform(image, target, mask)
             #image_black, target, mask = self.transform(image_black, target, mask)
+
         #target = self.encode_target(target)
-        #print("encode")
         target = self.encode_color_fast(target, mask)
-        #print("check")
-        #print(target[(target > 2) & (target != 255)])
+        spec_1 = spec_1[0,:,:]**2 + spec_1[1,:,:]**2
+        spec_2 = spec_2[0,:,:]**2 + spec_2[1,:,:]**2
+        spec_1[spec_1<1e-5]=1e-5
+        spec_2[spec_2<1e-5]=1e-5
+        spec_1 = np.log(spec_1)
+        spec_2 = np.log(spec_2)
+        spec_1 = np.expand_dims(spec_1, axis=0)
+        spec_2 = np.expand_dims(spec_2, axis=0)
         return image, target, torch.from_numpy(spec_1), torch.from_numpy(spec_2)
 
     def __len__(self):
