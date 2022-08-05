@@ -11,6 +11,7 @@ import numpy as np
 import os
 from tqdm import tqdm
 from PIL import Image
+import loss as Loss
 
 def load_config(config_path=None):
     cfg = get_cfg_defaults()
@@ -37,7 +38,7 @@ def main():
 
     # prepare model
     print("loading_model...")
-    model = audioToSeman(num_class=cfg.DATASET.NUM_CLASSES, in_channel=2, out_size=[960, 1920])
+    model = audioToSeman(num_class=cfg.DATASET.NUM_CLASSES, in_channel=1, out_size=[960, 1920])
     if cfg.MODEL.PRETRAINED is not None:
         model.load_state_dict(torch.load(cfg.MODEL.PRETRAINED))
     model = model.to(device)
@@ -61,7 +62,8 @@ def main():
 
     # criterion
     #criterion = nn.CrossEntropyLoss(ignore_index=255, reduction='mean')
-    criterion = nn.CrossEntropyLoss(reduction='mean')
+    #criterion = nn.CrossEntropyLoss(reduction='mean')
+    criterion, _ = Loss.get_loss("weighted", cfg.DATASET.NUM_CLASSES, ignore_index=255, device=device)
 
     # metrics
     metrics = SegMetrics(cfg.DATASET.NUM_CLASSES, device)
