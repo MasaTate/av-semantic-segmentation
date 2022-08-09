@@ -1,0 +1,30 @@
+CUDA:
+  USE_CUDA: True
+  CUDA_NUM: 0
+
+DATASET:
+  ROOT: "/work/masatate/dataset/dataset_public"
+  NUM_CLASSES: 19
+  TRACK: [3, 8]
+
+MODEL:
+  PRETRAINED: None
+
+LOG:
+  DIR: "./logs_auth"
+  LOSS: 50
+  IMAGE: 200
+
+RESULT:
+  PATH: "./result_auth"
+  SAVE_NUM: 3
+  WEIGHT_PATH: "./checkpoint_auth"
+  WEIGHT_ITER: 800
+
+TRAIN:
+  LR: 0.00001
+  BATCH_SIZE: 2
+  NUM_WORKERS: 4
+  EPOCH_START: 0
+  EPOCH_END: 20
+  VAL_EPOCH: 2

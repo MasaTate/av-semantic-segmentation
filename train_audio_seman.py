@@ -5,6 +5,7 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from config.default import get_cfg_defaults
 from dataset.sound_cityscapes import SoundCityscapes
+from dataset.sound_cityscapes_auth import SoundCityscapesAuth
 from networks.model import audioToSeman
 from metrics.metrics import SegMetrics
 from optimizer import get_optimizer
@@ -31,9 +32,14 @@ def main():
 
     # prepare dataset
     print("loading dataset...")
+    """
     transforms = vt.PairCompose([vt.PairResize([960, 1920]), vt.PairToTensor()])
     train_data = SoundCityscapes(cfg.DATASET.ROOT, split='train', transform=transforms, sound_track=cfg.DATASET.TRACK)
     val_data = SoundCityscapes(cfg.DATASET.ROOT, split='val', transform=transforms, sound_track=cfg.DATASET.TRACK)
+    """
+    transforms = vt.PairCompose([vt.PairToTensor()])
+    train_data = SoundCityscapesAuth(cfg.DATASET.ROOT, split='train', transform=transforms, sound_track=cfg.DATASET.TRACK)
+    val_data = SoundCityscapesAuth(cfg.DATASET.ROOT, split='val', transform=transforms, sound_track=cfg.DATASET.TRACK)
 
     train_loader = DataLoader(train_data, batch_size=cfg.TRAIN.BATCH_SIZE, shuffle=True, num_workers=cfg.TRAIN.NUM_WORKERS, drop_last=True)
     val_loader = DataLoader(val_data, batch_size=cfg.TRAIN.BATCH_SIZE, shuffle=True, num_workers=cfg.TRAIN.NUM_WORKERS)
@@ -46,7 +52,7 @@ def main():
     model = model.to(device)
 
     # optimizer, scheduler
-    optimizer, scheduler = get_optimizer(model, lr=0.00001 * cfg.TRAIN.BATCH_SIZE / 2, optimizer="Adam", scheduler="poly")
+    optimizer, scheduler = get_optimizer(model, cfg.TRAIN.LR, optimizer="Adam", scheduler="poly")
 
     # logging
     if not os.path.exists(cfg.LOG.DIR):
@@ -88,7 +94,11 @@ def main():
             loss = criterion(pred, target)
 
             # back prop
+            loss = loss.mean()
             loss.backward()
+
+            clip = 1
+            torch.nn.utils.clip_grad_norm_(model.parameters(), clip)
             optimizer.step()
             #print("fin")
             if (i+1) % cfg.LOG.LOSS == 0:

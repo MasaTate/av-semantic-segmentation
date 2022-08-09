@@ -5,6 +5,7 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from config.default import get_cfg_defaults
 from dataset.sound_cityscapes import SoundCityscapes
+from dataset.sound_cityscapes_auth import SoundCityscapesAuth
 from networks.model import audioToSeman
 from metrics.metrics import SegMetrics
 from optimizer import get_optimizer

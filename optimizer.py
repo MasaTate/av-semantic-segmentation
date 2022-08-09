@@ -2,9 +2,9 @@ import math
 import torch
 import torch.optim as optim
 
-def get_optimizer(model, lr=0.00004, optimizer='Adam', scheduler='poly'):
+def get_optimizer(model, lr=0.00001, optimizer='Adam', scheduler='poly'):
     if optimizer == 'Adam':
-        opt = optim.Adam(model.parameters(), lr=lr, weight_decay=1e-4)
+        opt = optim.Adam([{'params':model.encoder.parameters(), 'lr':lr*5}, {'params':model.decoder.parameters(), 'lr':lr}], lr=lr, weight_decay=1e-4)
     else:
         raise ValueError("Not a valid optimizer")
 
