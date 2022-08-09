@@ -5,6 +5,7 @@ from pickletools import uint8
 
 import torch
 import torch.utils.data as data
+import torchvision.transforms.functional as F
 from PIL import Image
 import numpy as np
 
@@ -85,6 +86,7 @@ class SoundCityscapes(data.Dataset):
         self.split = split
         self.images = []
         self.targets = []
+        self.original_images = []
         self.mask = []
         self.spectrogram_1 = []
         self.spectrogram_2 = []
@@ -103,12 +105,12 @@ class SoundCityscapes(data.Dataset):
 
 
             for i, file_name in enumerate(os.listdir(img_dir)):
-                if i > 1 and self.split == "val":
-                    break
                 self.images.append(os.path.join(img_dir, file_name))
                 target_name = '{}_{}'.format(os.path.splitext(file_name)[0],
                                              self._get_target_suffix(self.mode, self.target_type))
                 self.targets.append(os.path.join(target_dir, target_name))
+                if self.split == 'test':
+                    self.original_images.append(os.path.join(self.mask_dir, city, "split_videoframes", os.path.basename(file_name)))
                 self.mask.append(os.path.join(self.mask_dir, city, "pred_sound_making", os.path.basename(file_name)))
                 number = os.path.splitext(os.path.basename(file_name))[0].split("_")[-1]
                 self.spectrogram_1.append(os.path.join(self.spectrogram_dir, city, "spectrograms", "Track"+str(sound_track[0]), number+".npy"))
@@ -148,7 +150,7 @@ class SoundCityscapes(data.Dataset):
         target = np.array(target)
         mask = np.array(mask)
         assert target.shape[:2] == mask.shape
-        train_id = np.full((target.shape[0], target.shape[1]), 255, dtype=np.uint8)
+        train_id = np.full((target.shape[0], target.shape[1]), 0, dtype=np.uint8)
         color_dict = cls.train_id_to_color.sum(axis=1)
         target = target.sum(axis=2)
         for i in range(target.shape[0]):
@@ -158,7 +160,7 @@ class SoundCityscapes(data.Dataset):
                     if len(train_index) != 0:
                         
                         if train_index in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 18]:
-                            train_id[i][j] = 255
+                            train_id[i][j] = 0
                         else:
                             train_id[i][j] = train_index[0]
                         """
@@ -178,6 +180,7 @@ class SoundCityscapes(data.Dataset):
     @classmethod
     def decode_target(cls, target):
         target[target == 255] = len(cls.train_id_to_color) - 1
+        target[target == 0] = len(cls.train_id_to_color) - 1
         #target = target.astype('uint8') + 1
         return cls.train_id_to_color[target]
 
@@ -192,6 +195,8 @@ class SoundCityscapes(data.Dataset):
         #print("load")
         image = Image.open(self.images[index]).convert('RGB')
         #image_black = Image.new("RGB", (3840, 1920))
+        if self.split == 'test':
+            original_image = Image.open(self.original_images[index]).convert('RGB')
         target = Image.open(self.targets[index]).convert('RGB')
         mask = Image.open(self.mask[index]).convert('L')
         spec_1 = np.load(self.spectrogram_1[index])
@@ -211,6 +216,8 @@ class SoundCityscapes(data.Dataset):
         spec_2 = np.log(spec_2)
         spec_1 = np.expand_dims(spec_1, axis=0)
         spec_2 = np.expand_dims(spec_2, axis=0)
+        if self.split == 'test':
+            return torch.from_numpy(np.array(original_image, dtype=np.float32).transpose(2, 0, 1)), image, target, torch.from_numpy(spec_1), torch.from_numpy(spec_2)
         return image, target, torch.from_numpy(spec_1), torch.from_numpy(spec_2)
 
     def __len__(self):

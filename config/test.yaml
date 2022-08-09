@@ -1,0 +1,10 @@
+CUDA:
+  CUDA_NUM: 1
+DATASET:
+  TRACK: [3, 8]
+
+MODEL:
+  PRETRAINED: "./checkpoint_newloss/checkpoint_epoch7.pth"
+
+RESULT:
+  PATH: "./result_newloss"

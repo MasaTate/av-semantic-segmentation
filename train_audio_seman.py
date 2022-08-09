@@ -1,3 +1,4 @@
+from webbrowser import get
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
@@ -6,6 +7,7 @@ from config.default import get_cfg_defaults
 from dataset.sound_cityscapes import SoundCityscapes
 from networks.model import audioToSeman
 from metrics.metrics import SegMetrics
+from optimizer import get_optimizer
 import utils.visual_transform as vt
 import numpy as np
 import os
@@ -30,8 +32,8 @@ def main():
     # prepare dataset
     print("loading dataset...")
     transforms = vt.PairCompose([vt.PairResize([960, 1920]), vt.PairToTensor()])
-    train_data = SoundCityscapes(cfg.DATASET.ROOT, split='train', transform=transforms)
-    val_data = SoundCityscapes(cfg.DATASET.ROOT, split='val', transform=transforms)
+    train_data = SoundCityscapes(cfg.DATASET.ROOT, split='train', transform=transforms, sound_track=cfg.DATASET.TRACK)
+    val_data = SoundCityscapes(cfg.DATASET.ROOT, split='val', transform=transforms, sound_track=cfg.DATASET.TRACK)
 
     train_loader = DataLoader(train_data, batch_size=cfg.TRAIN.BATCH_SIZE, shuffle=True, num_workers=cfg.TRAIN.NUM_WORKERS, drop_last=True)
     val_loader = DataLoader(val_data, batch_size=cfg.TRAIN.BATCH_SIZE, shuffle=True, num_workers=cfg.TRAIN.NUM_WORKERS)
@@ -43,8 +45,8 @@ def main():
         model.load_state_dict(torch.load(cfg.MODEL.PRETRAINED))
     model = model.to(device)
 
-    # optimizer
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.00005)
+    # optimizer, scheduler
+    optimizer, scheduler = get_optimizer(model, lr=0.00001 * cfg.TRAIN.BATCH_SIZE / 2, optimizer="Adam", scheduler="poly")
 
     # logging
     if not os.path.exists(cfg.LOG.DIR):
@@ -108,7 +110,8 @@ def main():
             if (step + 1) % cfg.RESULT.WEIGHT_ITER == 0:
                 print("saving weight...")
                 torch.save(model.state_dict(), cfg.RESULT.WEIGHT_PATH + f'/checkpoint_epoch{epoch}_iter{step + 1}.pth')
-            
+
+        scheduler.step()    
             #TODO ずらす
             
         if (epoch+1) % cfg.TRAIN.VAL_EPOCH == 0:
