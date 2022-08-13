@@ -12,7 +12,7 @@ from tqdm import tqdm
 parser = argparse.ArgumentParser()
 parser.add_argument("--in_dir",default=".",help="dataset input root directory")
 parser.add_argument("--out_dir",help="dataset output root directory")
-parser.add_argument("--tracks", default=[3, 4, 5, 6, 7, 8], help="input track list")
+parser.add_argument("--tracks", default=[7, 8], help="input track list")
 args = parser.parse_args()
 
 # length of data to read.
@@ -78,10 +78,10 @@ for track in args.tracks:
         aud_Tr1,rate = get_signal(audiofolder+"/"+audiofolder.split('/')[-1].split('.')[0]+"_Tr"+str(track)+".WAV")
         rms_value = get_rms(track)
         aud_Tr1 = normalize(aud_Tr1,rms=rms_value)
-        save_dir=out_fdir+"spectrograms/Track"+str(track)+"/";
+        save_dir=out_fdir+"spectrograms_full/Track"+str(track)+"/";
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
-        for i in tqdm(sorted(glob.glob(in_fdir+"split_videoframes/*.png"))):
+        for i in tqdm(sorted(glob.glob(in_fdir+"split_videoframes_full/*.png"))):
             audio_start_time = int(i.split('_')[-1].split('.')[0])#random.uniform(0, 9.9 - self.opt.audio_length)
             audio_end_time = audio_start_time + audio_length
             audio_start = int(audio_start_time * rate)

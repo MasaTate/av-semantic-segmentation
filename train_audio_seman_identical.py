@@ -33,10 +33,9 @@ def main(args):
     print("loading dataset...")
     train_transforms = vt.PairCompose([vt.PairToTensor()])
     val_transforms = vt.PairCompose([vt.PairToTensor()])
-    train_data = dataset.get_dataset(type=cfg.DATASET.TYPE, root=cfg.DATASET.ROOT, split='train', transform=train_transforms, sound_track=cfg.DATASET.TRACK)
-    val_data = dataset.get_dataset(type=cfg.DATASET.TYPE, root=cfg.DATASET.ROOT, split='val', transform=val_transforms, sound_track=cfg.DATASET.TRACK)
-    #print(train_data[0])
-    #print(val_data[0])
+    train_data = dataset.get_dataset(type=cfg.DATASET.TYPE, root=cfg.DATASET.ROOT, split='train', transform=train_transforms, sound_track=cfg.DATASET.TRACK, check_track=cfg.DATASET.CHECK_TRACK)
+    val_data = dataset.get_dataset(type=cfg.DATASET.TYPE, root=cfg.DATASET.ROOT, split='val', transform=val_transforms, sound_track=cfg.DATASET.TRACK, check_track=cfg.DATASET.CHECK_TRACK)
+
     train_loader = DataLoader(train_data, batch_size=cfg.TRAIN.BATCH_SIZE, shuffle=True, num_workers=cfg.TRAIN.NUM_WORKERS, drop_last=True)
     val_loader = DataLoader(val_data, batch_size=cfg.TRAIN.BATCH_SIZE, shuffle=True, num_workers=cfg.TRAIN.NUM_WORKERS)
     print("---> " + cfg.DATASET.TYPE + " is loaded")

@@ -1,27 +1,28 @@
 CUDA:
   USE_CUDA: True
-  CUDA_NUM: 0
+  CUDA_NUM: 2
 
 DATASET:
-  TYPE: "SoundCityscapesAuth"
+  TYPE: "IdenticalRandom"
   ROOT: "/work/masatate/dataset/dataset_public"
   NUM_CLASSES: 19
-  TRACK: [1, 6]
+  TRACK: [3, 8]
+  CHECK_TRACK: 3
 
 MODEL:
   TYPE: "audioToSeman"
   PRETRAINED: None
 
 LOG:
-  DIR: "./logs_auth"
-  LOSS: 50
-  IMAGE: 200
+  DIR: "./logs_identical_random"
+  LOSS: 100
+  IMAGE: 3000
 
 RESULT:
-  PATH: "./result_auth"
+  PATH: "./result_identical_random"
   SAVE_NUM: 3
-  WEIGHT_PATH: "./checkpoint_auth"
-  WEIGHT_ITER: 800
+  WEIGHT_PATH: "./checkpoint_identical_random"
+  WEIGHT_ITER: 3000
 
 TRAIN:
   LR: 0.00001
@@ -30,4 +31,3 @@ TRAIN:
   EPOCH_START: 0
   EPOCH_END: 20
   VAL_EPOCH: 2
-  VAL_SIZE: [480, 960]

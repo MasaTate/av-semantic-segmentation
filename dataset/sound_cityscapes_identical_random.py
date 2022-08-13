@@ -11,7 +11,7 @@ from PIL import Image
 import numpy as np
 from tqdm import tqdm
 
-def make_dataset(root, mode, tracks=[3, 8]):
+def make_dataset(root, mode, tracks=[3, 8], check_track=3):
     """
     Assemble list of images + mask files
 
@@ -23,12 +23,13 @@ def make_dataset(root, mode, tracks=[3, 8]):
     gtCoarse/gtCoarse/train_extra/augsburg
     """
     items = []
-    audioDict=np.load(os.path.join(root, "SoundEnergy_165scenes_Track1.npy"), allow_pickle=True) #np.load('/'.join(root.split('/')[:-1])+"/SoundEnergy_165scenes_Track1.npy", allow_pickle=True)
+    check_track = 3
+    audioDict=np.load(os.path.join(root, f"SoundEnergy_165scenes_Track{check_track}.npy"), allow_pickle=True) #np.load('/'.join(root.split('/')[:-1])+"/SoundEnergy_165scenes_Track1.npy", allow_pickle=True)
     assert (mode in ['train', 'val'])
     if mode == 'train':
         for sc in tqdm(range(1,115)):
             img_dir_name = 'scene%04d'%sc
-            check_audioImg_path = os.path.join(root, img_dir_name, 'spectrograms_full/Track1/')
+            check_audioImg_path = os.path.join(root, img_dir_name, f'spectrograms_full/Track{check_track}/')
             # image
             img_path = os.path.join(root, img_dir_name,'split_videoframes_full/')
             
@@ -62,13 +63,13 @@ def make_dataset(root, mode, tracks=[3, 8]):
     if mode == 'val':
         for sc in tqdm(range(115,140)):
             img_dir_name = 'scene%04d'%sc
-            check_audioImg_path = os.path.join(root, img_dir_name, 'spectrograms_full/Track1/')
+            check_audioImg_path = os.path.join(root, img_dir_name, f'spectrograms_full/Track{check_track}/')
             # image
             img_path = os.path.join(root, img_dir_name,'split_videoframes_full/')
             
             # spectrogram
-            audioImg_path = os.path.join(root, img_dir_name, f'spectrograms_full/Track{int(tracks[1])}/')
-            audioImg_path6 = os.path.join(root, img_dir_name, f'spectrograms_full/Track{int(tracks[0])}/')
+            audioImg_path = os.path.join(root, img_dir_name, f'spectrograms_full/Track{int(tracks[0])}/')
+            audioImg_path6 = os.path.join(root, img_dir_name, f'spectrograms_full/Track{int(tracks[1])}/')
             
             # semantic segmentation ground truth
             mask_path = os.path.join(root, img_dir_name,'gtDLab/')
@@ -90,7 +91,7 @@ def make_dataset(root, mode, tracks=[3, 8]):
 
     return items
 
-class SoundCityscapesAuth(data.Dataset):
+class SoundCityscapesIdenticalRandom(data.Dataset):
     """Cityscapes <http://www.cityscapes-dataset.com/> Dataset.
     
     **Parameters:**
@@ -152,14 +153,14 @@ class SoundCityscapesAuth(data.Dataset):
     #train_id_to_color = np.array(train_id_to_color)
     #id_to_train_id = np.array([c.category_id for c in classes], dtype='uint8') - 1
 
-    def __init__(self, root, split='train', mode='fine', target_type='color', transform=None, sound_track=[3, 8]):
+    def __init__(self, root, split='train', mode='fine', target_type='color', transform=None, sound_track=[3, 8], check_track=3):
         if split not in ['train', 'test', 'val']:
             raise ValueError('Invalid split for mode! Please use split="train", split="test"'
                              ' or split="val"')
     
         self.root = os.path.expanduser(root)
         self.transform = transform
-        self.items = make_dataset(root, split, sound_track)
+        self.items = make_dataset(root, split, sound_track, check_track)
         if len(self.items) == 0:
             raise RuntimeError("Found 0 images, please check the data set (or path)")
         

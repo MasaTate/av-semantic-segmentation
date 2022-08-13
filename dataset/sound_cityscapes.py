@@ -217,7 +217,7 @@ class SoundCityscapes(data.Dataset):
         spec_1 = np.expand_dims(spec_1, axis=0)
         spec_2 = np.expand_dims(spec_2, axis=0)
         if self.split == 'test':
-            return torch.from_numpy(np.array(original_image, dtype=np.float32).transpose(2, 0, 1)), image, target, torch.from_numpy(spec_1), torch.from_numpy(spec_2)
+            return F.to_tensor(original_image), image, target, torch.from_numpy(spec_1), torch.from_numpy(spec_2)
         return image, target, torch.from_numpy(spec_1), torch.from_numpy(spec_2)
 
     def __len__(self):

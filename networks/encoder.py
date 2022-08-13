@@ -110,6 +110,89 @@ class audioEncoder(nn.Module):
 
         return audio
 
+class audioEncoderSeparate(nn.Module):
+    def __init__(self, in_channel, mid_channel=64):
+        super().__init__()
+
+        self.conv1_audio1 = downconv(in_channel, mid_channel)
+        self.conv2_audio1 = downconv(mid_channel, mid_channel * 2)
+        self.conv3_audio1 = downconv(mid_channel * 2, mid_channel * 4)
+        self.conv4_audio1 = downconv(mid_channel * 4, mid_channel * 8)
+
+        self.conv1_audio2 = downconv(in_channel, mid_channel)
+        self.conv2_audio2 = downconv(mid_channel, mid_channel * 2)
+        self.conv3_audio2 = downconv(mid_channel * 2, mid_channel * 4)
+        self.conv4_audio2 = downconv(mid_channel * 4, mid_channel * 8)
+        
+        self.aspp = _AtrousSpatialPyramidPoolingModule(512, 64, output_stride=8)
+        self.post_us_audio1 = nn.Conv2d(512, 256, kernel_size=1, bias=False)
+        self.post_us_audio2 = nn.Conv2d(512, 256, kernel_size=1, bias=False)
+
+        self.post_cat = nn.Conv2d(512, 512, kernel_size=1, bias=False)
+        self.post_aspp = nn.Conv2d(320, 256, kernel_size=1, bias=False)
+
+        initialize_weights(self.post_us_audio1)
+        initialize_weights(self.post_us_audio2)
+        initialize_weights(self.post_cat)
+
+        
+    def forward(self, audio_1, audio_2):
+        audio_1 = self.conv1_audio1(audio_1)
+        audio_1 = self.conv2_audio1(audio_1)
+        audio_1 = self.conv3_audio1(audio_1)
+        audio_1 = self.conv4_audio1(audio_1)
+
+        audio_2 = self.conv1_audio2(audio_2)
+        audio_2 = self.conv2_audio2(audio_2)
+        audio_2 = self.conv3_audio2(audio_2)
+        audio_2 = self.conv4_audio2(audio_2)
+
+        audio_1 = Upsample(audio_1, [60, 120])
+        audio_1 = self.post_us_audio1(audio_1)
+        audio_2 = Upsample(audio_2, [60, 120])
+        audio_2 = self.post_us_audio2(audio_2)
+
+        audio = torch.cat([audio_1, audio_2], 1)
+        audio = self.post_cat(audio)
+
+        audio = self.aspp(audio)
+        audio = self.post_aspp(audio)
+
+        return audio
+
+
+class singleAudioEncoder(nn.Module):
+    def __init__(self, in_channel, mid_channel=64):
+        super().__init__()
+
+        self.conv1_audio1 = downconv(in_channel, mid_channel)
+        self.conv2_audio1 = downconv(mid_channel, mid_channel * 2)
+        self.conv3_audio1 = downconv(mid_channel * 2, mid_channel * 4)
+        self.conv4_audio1 = downconv(mid_channel * 4, mid_channel * 8)
+
+        self.aspp = _AtrousSpatialPyramidPoolingModule(512, 64, output_stride=8)
+        self.post_us_audio1 = nn.Conv2d(512, 512, kernel_size=1, bias=False)
+        self.post_aspp = nn.Conv2d(320, 256, kernel_size=1, bias=False)
+
+        initialize_weights(self.post_us_audio1)
+
+        
+    def forward(self, audio_1):
+        audio_1 = self.conv1_audio1(audio_1)
+        audio_1 = self.conv2_audio1(audio_1)
+        audio_1 = self.conv3_audio1(audio_1)
+        audio_1 = self.conv4_audio1(audio_1)
+
+        audio_1 = Upsample(audio_1, [60, 120])
+        audio = self.post_us_audio1(audio_1)
+
+        audio = self.post_cat(audio)
+
+        audio = self.aspp(audio)
+        audio = self.post_aspp(audio)
+
+        return audio
+
 """
 from torchsummary import summary
 model = audioEncoder(2, 2)

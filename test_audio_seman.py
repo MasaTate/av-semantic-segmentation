@@ -4,9 +4,8 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from config.default import get_cfg_defaults
-from dataset.sound_cityscapes import SoundCityscapes
-from dataset.sound_cityscapes_auth import SoundCityscapesAuth
-from networks.model import audioToSeman
+import dataset
+import networks
 from metrics.metrics import SegMetrics
 from optimizer import get_optimizer
 import utils.visual_transform as vt
@@ -33,13 +32,13 @@ def main():
     # prepare dataset
     print("loading dataset...")
     transforms = vt.PairCompose([vt.PairResize([960, 1920]), vt.PairToTensor()])
-    test_data = SoundCityscapes(cfg.DATASET.ROOT, split='test', transform=transforms, sound_track=cfg.DATASET.TRACK)
+    test_data = dataset.get_dataset(cfg.DATASET.TYPE, cfg.DATASET.ROOT, split='test', transform=transforms, sound_track=cfg.DATASET.TRACK)
 
     test_loader = DataLoader(test_data, batch_size=cfg.TRAIN.BATCH_SIZE, num_workers=cfg.TRAIN.NUM_WORKERS)
 
     # prepare model
     print("loading_model...")
-    model = audioToSeman(num_class=cfg.DATASET.NUM_CLASSES, in_channel=1, out_size=[960, 1920])
+    model = networks.get_model(type=cfg.MODEL.TYPE, num_class=cfg.DATASET.NUM_CLASSES, in_channel=1, out_size=[960, 1920])
     if cfg.MODEL.PRETRAINED is None: print("Input the model weight")
     
     model.load_state_dict(torch.load(cfg.MODEL.PRETRAINED))
@@ -85,7 +84,7 @@ def validation(val_loader, model, device, metrics, results_path, save_num):
                     pred_save = val_loader.dataset.decode_target(pred_save).astype(np.uint8)
                     
                     Image.fromarray(original_image_save).save(results_path+"/original_{}.png".format(save_count))
-                    Image.fromarray(image_save).save(results_path+"/image_{}.png".format(save_count))
+                    #Image.fromarray(image_save).save(results_path+"/image_{}.png".format(save_count))
                     Image.fromarray(target_save).save(results_path+"/label_{}.png".format(save_count))
                     Image.fromarray(pred_save).save(results_path+"/predict_{}.png".format(save_count))
                     

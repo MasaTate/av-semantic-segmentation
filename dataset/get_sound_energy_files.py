@@ -42,13 +42,13 @@ tracks = [1,2,3,4,5,6,7,8]
 for track in tracks:
     adict={}
     energyArr=[]
-    for sc in range(1,166):
-        fdir="../../../../work/masatate/dataset/dataset_public/scene%04d/"%sc
+    for sc in tqdm(range(1,166)):
+        fdir="/work/masatate/dataset/dataset_public/scene%04d/"%sc
         adict[sc]=[]
         #print(sc,len(glob.glob(fdir+f"wavsplits/Track{track}/"+"*.npy")))
 
         scene_energy = []
-        for g in glob.glob(fdir+f"wavsplits/Track{track}/"+"*.npy"):
+        for g in glob.glob(fdir+f"wavsplits_full/Track{track}/"+"*.npy"):
             soundCH = np.load(g)
             #plot_with_markers(soundCH)
             mySoundLength = len(soundCH)
@@ -59,12 +59,12 @@ for track in tracks:
             #plot_freq(fftArray,mySoundLength)
             energy = np.sum(fftArray);energyArr.append(energy);
             scene_energy.append(energy)
-            if energy>thresh:    adict[sc].append(fdir+f'spectrograms/Track{track}/'+g.split('/')[-1].split('.')[0]+".npy")
+            if energy>thresh:    adict[sc].append(fdir+f'spectrograms_full/Track{track}/'+g.split('/')[-1].split('.')[0]+".npy")
 
         #scene_energy = np.array(scene_energy)
         #if scene_energy.max() < 1e-4:
             #print("Track : %d, scene : %d"%(track, sc))
-    np.save(f'../../../../work/masatate/dataset/dataset_public_full/SoundEnergy_165scenes_Track{track}.npy',adict)
+    np.save(f'/work/masatate/dataset/dataset_public/SoundEnergy_165scenes_Track{track}.npy',adict)
     print(f"Saved Track{track} sound scenes.")
 
 ### To plot the energy plot ###

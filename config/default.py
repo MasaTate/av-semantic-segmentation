@@ -9,14 +9,17 @@ _C.CUDA.CUDA_NUM = 0
 
 # dataset
 _C.DATASET = CN()
-
+_C.DATASET.TYPE = "SoundCityscapes"
 _C.DATASET.ROOT = "/work/masatate/dataset/dataset_public"
 _C.DATASET.NUM_CLASSES = 19
 _C.DATASET.TRACK = [1, 6]
+_C.DATASET.CHECK_TRACK = 1
 
 # model
 _C.MODEL = CN()
-_C.MODEL.PRETRAINED = None
+_C.MODEL.TYPE = "audioToSeman" #"audioToSemanSep"
+_C.MODEL.PRETRAINED = None 
+
 
 # log
 _C.LOG = CN()
