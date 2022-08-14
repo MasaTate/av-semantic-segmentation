@@ -33,8 +33,8 @@ def main(args):
     print("loading dataset...")
     train_transforms = vt.PairCompose([vt.PairToTensor()])
     val_transforms = vt.PairCompose([vt.PairToTensor()])
-    train_data = dataset.get_dataset(type=cfg.DATASET.TYPE, root=cfg.DATASET.ROOT, split='train', transform=train_transforms, sound_track=cfg.DATASET.TRACK, check_track=cfg.DATASET.CHECK_TRACK)
-    val_data = dataset.get_dataset(type=cfg.DATASET.TYPE, root=cfg.DATASET.ROOT, split='val', transform=val_transforms, sound_track=cfg.DATASET.TRACK, check_track=cfg.DATASET.CHECK_TRACK)
+    train_data = dataset.get_dataset(type=cfg.DATASET.TYPE, root=cfg.DATASET.ROOT, split='train', transform=train_transforms, sound_track=cfg.DATASET.TRACK, check_track=cfg.DATASET.CHECK_TRACK, rotate=cfg.DATASET.ROTATE, crop=cfg.DATASET.CROP)
+    val_data = dataset.get_dataset(type=cfg.DATASET.TYPE, root=cfg.DATASET.ROOT, split='val', transform=val_transforms, sound_track=cfg.DATASET.TRACK, check_track=cfg.DATASET.CHECK_TRACK, rotate=cfg.DATASET.ROTATE, crop=cfg.DATASET.CROP)
 
     train_loader = DataLoader(train_data, batch_size=cfg.TRAIN.BATCH_SIZE, shuffle=True, num_workers=cfg.TRAIN.NUM_WORKERS, drop_last=True)
     val_loader = DataLoader(val_data, batch_size=cfg.TRAIN.BATCH_SIZE, shuffle=True, num_workers=cfg.TRAIN.NUM_WORKERS)
@@ -81,17 +81,16 @@ def main(args):
 
     for epoch in range(cfg.TRAIN.EPOCH_START, cfg.TRAIN.EPOCH_END):
         print(f'epoch : {epoch}')
-        for i, (_, target, audio_1, audio_2) in enumerate(tqdm(train_loader)):
+        for i, (_, target, audio_1) in enumerate(tqdm(train_loader)):
             model.train()
             step = epoch * len(train_loader) + i
 
             target = target.to(device, dtype=torch.long)
             audio_1 = audio_1.to(device, dtype=torch.float32)
-            audio_2 = audio_2.to(device, dtype=torch.float32)
             #print("calc")
             optimizer.zero_grad()
 
-            pred = model(audio_1, audio_2, target)
+            pred = model(audio_1, target)
             loss = criterion(pred, target)
 
             # back prop
@@ -116,7 +115,7 @@ def main(args):
                 writer.add_image('train_target', target_save, step + 1)
                 writer.add_image('train_pred', pred_save, step + 1)
 
-            del target, audio_1, audio_2
+            del target, audio_1
 
             if (step + 1) % cfg.RESULT.WEIGHT_ITER == 0:
                 print("saving weight...")
@@ -139,12 +138,11 @@ def validation(val_loader, model, device, metrics, epoch, results_path, save_num
     model.eval()
     print("======================evaluation======================")
     save_count = 0
-    for i, (image, target, audio_1, audio_2) in enumerate(tqdm(val_loader)):
+    for i, (image, target, audio_1) in enumerate(tqdm(val_loader)):
         with torch.no_grad():
             image = image.to(device, dtype=torch.float32)
             target = target.to(device, dtype=torch.long)
             audio_1 = audio_1.to(device, dtype=torch.float32)
-            audio_2 = audio_2.to(device, dtype=torch.float32)
 
             pred = model(audio_1, audio_2, target)
             pred_label = pred.detach().max(dim=1)[1]
@@ -167,7 +165,7 @@ def validation(val_loader, model, device, metrics, epoch, results_path, save_num
                     
                     save_count += 1
             
-            del image, target, audio_1, audio_2
+            del image, target, audio_1
             
     score = metrics.get_results()
 

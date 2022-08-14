@@ -8,6 +8,8 @@ DATASET:
   NUM_CLASSES: 
   TRACK: 
   CHECK_TRACK: 
+  ROTATE: 
+  CROP: 
 
 MODEL: 
   TYPE: 

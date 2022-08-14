@@ -1,0 +1,34 @@
+CUDA:
+  USE_CUDA: True
+  CUDA_NUM: 5
+
+DATASET:
+  TYPE: "DifferentFixedRotate"
+  ROOT: "/work/masatate/dataset/dataset_public"
+  NUM_CLASSES: 19
+  TRACK: [3, 8]
+  CHECK_TRACK: 3
+  ROTATE: None
+
+MODEL:
+  TYPE: "audioToSemanSep"
+  PRETRAINED: None
+
+LOG:
+  DIR: "./logs_different_fixed_3_front"
+  LOSS: 100
+  IMAGE: 3000
+
+RESULT:
+  PATH: "./result_different_fixed_3_front"
+  SAVE_NUM: 3
+  WEIGHT_PATH: "./checkpoint_different_fixed_3_front"
+  WEIGHT_ITER: 3000
+
+TRAIN:
+  LR: 0.00001
+  BATCH_SIZE: 2
+  NUM_WORKERS: 4
+  EPOCH_START: 0
+  EPOCH_END: 20
+  VAL_EPOCH: 2

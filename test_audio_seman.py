@@ -31,14 +31,14 @@ def main():
 
     # prepare dataset
     print("loading dataset...")
-    transforms = vt.PairCompose([vt.PairResize([960, 1920]), vt.PairToTensor()])
-    test_data = dataset.get_dataset(cfg.DATASET.TYPE, cfg.DATASET.ROOT, split='test', transform=transforms, sound_track=cfg.DATASET.TRACK)
+    test_transforms = vt.PairCompose([vt.PairToTensor()])
+    test_data = dataset.get_dataset(type=cfg.DATASET.TYPE, root=cfg.DATASET.ROOT, split='val', transform=test_transforms, sound_track=cfg.DATASET.TRACK)
 
     test_loader = DataLoader(test_data, batch_size=cfg.TRAIN.BATCH_SIZE, num_workers=cfg.TRAIN.NUM_WORKERS)
 
     # prepare model
     print("loading_model...")
-    model = networks.get_model(type=cfg.MODEL.TYPE, num_class=cfg.DATASET.NUM_CLASSES, in_channel=1, out_size=[960, 1920])
+    model = networks.get_model(type=cfg.MODEL.TYPE, num_class=cfg.DATASET.NUM_CLASSES, in_channel=1)
     if cfg.MODEL.PRETRAINED is None: print("Input the model weight")
     
     model.load_state_dict(torch.load(cfg.MODEL.PRETRAINED))
@@ -58,33 +58,29 @@ def validation(val_loader, model, device, metrics, results_path, save_num):
     model.eval()
     print("======================evaluation======================")
     save_count = 0
-    for i, (original_image, image, target, audio_1, audio_2) in enumerate(tqdm(val_loader)):
+    for i, (image, target, audio_1, audio_2) in enumerate(tqdm(val_loader)):
         with torch.no_grad():
-            original_image = original_image.to(dtype=torch.float32)
             image = image.to(device, dtype=torch.float32)
             target = target.to(device, dtype=torch.long)
             audio_1 = audio_1.to(device, dtype=torch.float32)
             audio_2 = audio_2.to(device, dtype=torch.float32)
 
-            pred = model(audio_1, audio_2)
+            pred = model(audio_1, audio_2, target)
             pred_label = pred.detach().max(dim=1)[1]
 
             metrics.update(target, pred_label)
 
             
             if save_num != 0 and i % (len(val_loader) // save_num) == 0:
-                    original_image_save = original_image[0].cpu().numpy()
                     image_save = image[0].detach().cpu().numpy()
                     target_save = target[0].cpu().numpy()
                     pred_save = pred_label[0].cpu().numpy()
-
-                    original_image_save = (original_image_save*255).transpose(1, 2, 0).astype(np.uint8)
+                    
                     image_save = (image_save*255).transpose(1, 2, 0).astype(np.uint8)
                     target_save = val_loader.dataset.decode_target(target_save).astype(np.uint8)
                     pred_save = val_loader.dataset.decode_target(pred_save).astype(np.uint8)
                     
-                    Image.fromarray(original_image_save).save(results_path+"/original_{}.png".format(save_count))
-                    #Image.fromarray(image_save).save(results_path+"/image_{}.png".format(save_count))
+                    Image.fromarray(image_save).save(results_path+"/image_{}.png".format(save_count))
                     Image.fromarray(target_save).save(results_path+"/label_{}.png".format(save_count))
                     Image.fromarray(pred_save).save(results_path+"/predict_{}.png".format(save_count))
                     
@@ -93,6 +89,7 @@ def validation(val_loader, model, device, metrics, results_path, save_num):
             del image, target, audio_1, audio_2
             
     score = metrics.get_results()
+
     return score
 
 if __name__ == "__main__":

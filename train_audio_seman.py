@@ -139,6 +139,7 @@ def main(args):
 def validation(val_loader, model, device, metrics, epoch, results_path, save_num):
     model.eval()
     print("======================evaluation======================")
+    save_count = 0
     for i, (image, target, audio_1, audio_2) in enumerate(tqdm(val_loader)):
         with torch.no_grad():
             image = image.to(device, dtype=torch.float32)
@@ -151,7 +152,7 @@ def validation(val_loader, model, device, metrics, epoch, results_path, save_num
 
             metrics.update(target, pred_label)
 
-            save_count = 0
+            
             if save_num != 0 and i % (len(val_loader) // save_num) == 0:
                     image_save = image[0].detach().cpu().numpy()
                     target_save = target[0].cpu().numpy()

@@ -37,7 +37,7 @@ def mapi(x):
     return (x -np.min(x))+1e-4/(np.max(x)-np.min(x))
 
 thresh = 0.0002
-tracks = [1,2,3,4,5,6,7,8]
+tracks = [3]
 
 for track in tracks:
     adict={}

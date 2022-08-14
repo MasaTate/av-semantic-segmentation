@@ -21,7 +21,7 @@ class audioToSemanSep(nn.Module):
         self.decoder = semanDecoder(256, num_class)
 
     def forward(self, audio_1, audio_2, target):
-        x = self.encoder(audio_1, audio_2, target)
+        x = self.encoder(audio_1, audio_2)
         x = self.decoder(x, target)
         return x
 

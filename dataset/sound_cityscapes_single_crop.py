@@ -11,7 +11,7 @@ from PIL import Image
 import numpy as np
 from tqdm import tqdm
 
-def make_dataset(root, mode, tracks=[3, 8]):
+def make_dataset(root, mode, tracks=[3, 8], check_track=3):
     """
     Assemble list of images + mask files
 
@@ -23,16 +23,18 @@ def make_dataset(root, mode, tracks=[3, 8]):
     gtCoarse/gtCoarse/train_extra/augsburg
     """
     items = []
-    audioDict=np.load(os.path.join(root, "SoundEnergy_165scenes_Track1.npy"), allow_pickle=True) #np.load('/'.join(root.split('/')[:-1])+"/SoundEnergy_165scenes_Track1.npy", allow_pickle=True)
+    check_track = 3
+    audioDict=np.load(os.path.join(root, f"SoundEnergy_165scenes_Track{check_track}.npy"), allow_pickle=True) #np.load('/'.join(root.split('/')[:-1])+"/SoundEnergy_165scenes_Track1.npy", allow_pickle=True)
     assert (mode in ['train', 'val'])
     if mode == 'train':
         for sc in tqdm(range(1,115)):
             img_dir_name = 'scene%04d'%sc
-            check_audioImg_path = os.path.join(root, img_dir_name, 'spectrograms_full/Track1/')
+            check_audioImg_path = os.path.join(root, img_dir_name, f'spectrograms_full/Track{check_track}/')
             # image
             img_path = os.path.join(root, img_dir_name,'split_videoframes_full/')
             
             # spectrogram
+            """
             randomno = np.random.randint(0,2)
             if randomno ==0:
                 audioImg_path = os.path.join(root, img_dir_name, f'spectrograms_full/Track{int(tracks[0])}/')
@@ -40,6 +42,9 @@ def make_dataset(root, mode, tracks=[3, 8]):
             else:
                 audioImg_path = os.path.join(root, img_dir_name, f'spectrograms_full/Track{int(tracks[1])}/')
                 audioImg_path6 = os.path.join(root, img_dir_name, f'spectrograms_full/Track{int(tracks[0])}/')
+            """
+            audioImg_path = os.path.join(root, img_dir_name, f'spectrograms_full/Track{int(tracks[0])}/')
+            #audioImg_path6 = os.path.join(root, img_dir_name, f'spectrograms_full/Track{int(tracks[1])}/')
             
             # semantic segmentation ground truth
             mask_path = os.path.join(root, img_dir_name,'gtDLab/')
@@ -56,19 +61,19 @@ def make_dataset(root, mode, tracks=[3, 8]):
                     assert len(glob.glob(os.path.join(img_path, "*_"+it+".png"))) == 1
                     assert len(glob.glob(os.path.join(mask_path, "*"+it+seg_postfix))) == 1
                     assert len(glob.glob(os.path.join(binary_mask_path, "*"+it+mask_postfix))) == 1
-                    item = (glob.glob(os.path.join(img_path, "*_"+it+".png"))[0], glob.glob(os.path.join(mask_path, "*"+it+seg_postfix))[0], glob.glob(os.path.join(binary_mask_path, "*"+it+mask_postfix))[0], os.path.join(audioImg_path, it+".npy"), os.path.join(audioImg_path6, it+".npy"), mode)
+                    item = (glob.glob(os.path.join(img_path, "*_"+it+".png"))[0], glob.glob(os.path.join(mask_path, "*"+it+seg_postfix))[0], glob.glob(os.path.join(binary_mask_path, "*"+it+mask_postfix))[0], os.path.join(audioImg_path, it+".npy"), mode)
                     items.append(item)
 
     if mode == 'val':
         for sc in tqdm(range(115,140)):
             img_dir_name = 'scene%04d'%sc
-            check_audioImg_path = os.path.join(root, img_dir_name, 'spectrograms_full/Track1/')
+            check_audioImg_path = os.path.join(root, img_dir_name, f'spectrograms_full/Track{check_track}/')
             # image
             img_path = os.path.join(root, img_dir_name,'split_videoframes_full/')
             
             # spectrogram
-            audioImg_path = os.path.join(root, img_dir_name, f'spectrograms_full/Track{int(tracks[1])}/')
-            audioImg_path6 = os.path.join(root, img_dir_name, f'spectrograms_full/Track{int(tracks[0])}/')
+            audioImg_path = os.path.join(root, img_dir_name, f'spectrograms_full/Track{int(tracks[0])}/')
+            #audioImg_path6 = os.path.join(root, img_dir_name, f'spectrograms_full/Track{int(tracks[1])}/')
             
             # semantic segmentation ground truth
             mask_path = os.path.join(root, img_dir_name,'gtDLab/')
@@ -85,41 +90,12 @@ def make_dataset(root, mode, tracks=[3, 8]):
                     assert len(glob.glob(os.path.join(img_path, "*_"+it+".png"))) == 1
                     assert len(glob.glob(os.path.join(mask_path, "*"+it+seg_postfix))) == 1
                     assert len(glob.glob(os.path.join(binary_mask_path, "*"+it+mask_postfix))) == 1
-                    item = (glob.glob(os.path.join(img_path, "*_"+it+".png"))[0], glob.glob(os.path.join(mask_path, "*"+it+seg_postfix))[0], glob.glob(os.path.join(binary_mask_path, "*"+it+mask_postfix))[0], os.path.join(audioImg_path, it+".npy"), os.path.join(audioImg_path6, it+".npy"), mode)
+                    item = (glob.glob(os.path.join(img_path, "*_"+it+".png"))[0], glob.glob(os.path.join(mask_path, "*"+it+seg_postfix))[0], glob.glob(os.path.join(binary_mask_path, "*"+it+mask_postfix))[0], os.path.join(audioImg_path, it+".npy"), mode)
                     items.append(item)
-
-        if mode == 'test':
-            for sc in tqdm(range(140,166)):
-                img_dir_name = 'scene%04d'%sc
-                check_audioImg_path = os.path.join(root, img_dir_name, 'spectrograms_full/Track1/')
-                # image
-                img_path = os.path.join(root, img_dir_name,'split_videoframes_full/')
-                
-                # spectrogram
-                audioImg_path = os.path.join(root, img_dir_name, f'spectrograms_full/Track{int(tracks[1])}/')
-                audioImg_path6 = os.path.join(root, img_dir_name, f'spectrograms_full/Track{int(tracks[0])}/')
-                
-                # semantic segmentation ground truth
-                mask_path = os.path.join(root, img_dir_name,'gtDLab/')
-                
-                # sound making map
-                binary_mask_path = os.path.join(root, img_dir_name,'binary_mask_full/')
-                
-                seg_postfix = '_gtDLab_labelIds.png'
-                mask_postfix = '_mask.png'
-                for it_full in glob.glob(check_audioImg_path+"*.npy"):
-                    #print(it_full)
-                    it = it_full.split('/')[-1].split('.')[0]
-                    if it_full in audioDict.item()[sc]:
-                        assert len(glob.glob(os.path.join(img_path, "*_"+it+".png"))) == 1
-                        assert len(glob.glob(os.path.join(mask_path, "*"+it+seg_postfix))) == 1
-                        assert len(glob.glob(os.path.join(binary_mask_path, "*"+it+mask_postfix))) == 1
-                        item = (glob.glob(os.path.join(img_path, "*_"+it+".png"))[0], glob.glob(os.path.join(mask_path, "*"+it+seg_postfix))[0], glob.glob(os.path.join(binary_mask_path, "*"+it+mask_postfix))[0], os.path.join(audioImg_path, it+".npy"), os.path.join(audioImg_path6, it+".npy"), mode)
-                        items.append(item)
 
     return items
 
-class SoundCityscapesAuth(data.Dataset):
+class SoundCityscapesSingleCrop(data.Dataset):
     """Cityscapes <http://www.cityscapes-dataset.com/> Dataset.
     
     **Parameters:**
@@ -181,16 +157,22 @@ class SoundCityscapesAuth(data.Dataset):
     #train_id_to_color = np.array(train_id_to_color)
     #id_to_train_id = np.array([c.category_id for c in classes], dtype='uint8') - 1
 
-    def __init__(self, root, split='train', mode='fine', target_type='color', transform=None, sound_track=[3, 8]):
+    def __init__(self, root, split='train', mode='fine', target_type='color', transform=None, sound_track=[3], check_track=3, rotate=None, crop=None):
         if split not in ['train', 'test', 'val']:
             raise ValueError('Invalid split for mode! Please use split="train", split="test"'
                              ' or split="val"')
     
         self.root = os.path.expanduser(root)
         self.transform = transform
-        self.items = make_dataset(root, split, sound_track)
+        self.items = make_dataset(root, split, sound_track, check_track)
         if len(self.items) == 0:
             raise RuntimeError("Found 0 images, please check the data set (or path)")
+
+        self.rotate = rotate
+        if self.rotate is not None:
+            assert isinstance(self.rotate, int)
+            assert self.rotate <= 360 and self.rotate >= 0
+        self.crop = crop
         
 
     @classmethod
@@ -212,19 +194,19 @@ class SoundCityscapesAuth(data.Dataset):
             tuple: (image, target) where target is a tuple of all target types if target_type is a list with more
             than one item. Otherwise target is a json object if target_type="polygon", else the image segmentation.
         """
-        img_path, mask_path, bin_mask_path, spec_path_1, spec_path_2, mode = self.items[index]
+        img_path, mask_path, bin_mask_path, spec_path_1, mode = self.items[index]
 
         image = Image.open(img_path).convert('RGB')
         target = Image.open(mask_path).convert('L')
         mask = Image.open(bin_mask_path).convert('L')
         spec_1 = np.load(spec_path_1)
-        spec_2 = np.load(spec_path_2)
 
         if self.transform:
             image, target, mask = self.transform(image, target, mask)
 
         target = self.encode_target(target)
         target[mask<128] = 0
+        target = torch.from_numpy(target)
         """
         if mode=='val':
             assert image.shape[-2] == 480
@@ -238,16 +220,33 @@ class SoundCityscapesAuth(data.Dataset):
             target = target_rot
             mask = mask_rot
         """
-            
+        # left rotation
+        if self.rotate is not None:
+            height, width = image.shape[-2:]
+            #print("height:",height, "width:", width)
+            x = int(width * self.rotate / 360)
+            image_rot = image.clone()
+            target_rot = target.clone()
+            mask_rot = mask.clone()
+            image_rot[:,:,0:width-x] = image[:,:,x:width]; image_rot[:,:,width-x:width] = image[:,:,0:x]
+            target_rot[:,0:width-x] = target[:,x:width]; target_rot[:,width-x:width] = target[:,0:x]
+            mask_rot[:,0:width-x] = mask[:,x:width]; mask_rot[:,width-x:width] = mask[:,0:x]
+            image = image_rot
+            target = target_rot
+            mask = mask_rot
+        
+        if self.crop is not None:
+            height, width = image.shape[-2:]
+            image = image[:,:,width//4:width*3//4]
+            target = target[:,width//4:width*3//4]
+            mask = mask[:,width//4:width*3//4]
+            #print(target.shape)
+
         spec_1 = spec_1[0,:,:]**2 + spec_1[1,:,:]**2
-        spec_2 = spec_2[0,:,:]**2 + spec_2[1,:,:]**2
         spec_1[spec_1<1e-5]=1e-5
-        spec_2[spec_2<1e-5]=1e-5
         spec_1 = np.log(spec_1)
-        spec_2 = np.log(spec_2)
         spec_1 = np.expand_dims(spec_1, axis=0)
-        spec_2 = np.expand_dims(spec_2, axis=0)
-        return image, target, torch.from_numpy(spec_1), torch.from_numpy(spec_2)
+        return image, target, torch.from_numpy(spec_1)
 
     def __len__(self):
         return len(self.items)

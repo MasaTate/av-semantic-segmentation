@@ -1,13 +1,13 @@
 CUDA:
-  CUDA_NUM: 0
+  CUDA_NUM: 8
 DATASET:
-  TYPE: "SoundCityscapes"
-  TRACK: [3, 8]
+  TYPE: "SoundCityscapesAuth"
+  TRACK: [1, 6]
 
 MODEL:
   TYPE: "audioToSeman"
-  PRETRAINED: "./checkpoint_newloss_lr/checkpoint_epoch19.pth"
+  PRETRAINED: "./checkpoint_auth/checkpoint_epoch8.pth"
 
 RESULT:
-  PATH: "./result_newloss_lr"
+  PATH: "./result_auth"
   SAVE_NUM: 10

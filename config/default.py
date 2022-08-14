@@ -14,6 +14,8 @@ _C.DATASET.ROOT = "/work/masatate/dataset/dataset_public"
 _C.DATASET.NUM_CLASSES = 19
 _C.DATASET.TRACK = [1, 6]
 _C.DATASET.CHECK_TRACK = 1
+_C.DATASET.ROTATE = 0
+_C.DATASET.CROP = None
 
 # model
 _C.MODEL = CN()

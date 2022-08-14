@@ -33,8 +33,8 @@ def main(args):
     print("loading dataset...")
     train_transforms = vt.PairCompose([vt.PairToTensor()])
     val_transforms = vt.PairCompose([vt.PairToTensor()])
-    train_data = dataset.get_dataset(type=cfg.DATASET.TYPE, root=cfg.DATASET.ROOT, split='train', transform=train_transforms, sound_track=cfg.DATASET.TRACK, check_track=cfg.DATASET.CHECK_TRACK)
-    val_data = dataset.get_dataset(type=cfg.DATASET.TYPE, root=cfg.DATASET.ROOT, split='val', transform=val_transforms, sound_track=cfg.DATASET.TRACK, check_track=cfg.DATASET.CHECK_TRACK)
+    train_data = dataset.get_dataset(type=cfg.DATASET.TYPE, root=cfg.DATASET.ROOT, split='train', transform=train_transforms, sound_track=cfg.DATASET.TRACK, check_track=cfg.DATASET.CHECK_TRACK, rotate=cfg.DATASET.ROTATE)
+    val_data = dataset.get_dataset(type=cfg.DATASET.TYPE, root=cfg.DATASET.ROOT, split='val', transform=val_transforms, sound_track=cfg.DATASET.TRACK, check_track=cfg.DATASET.CHECK_TRACK, rotate=cfg.DATASET.ROTATE)
 
     train_loader = DataLoader(train_data, batch_size=cfg.TRAIN.BATCH_SIZE, shuffle=True, num_workers=cfg.TRAIN.NUM_WORKERS, drop_last=True)
     val_loader = DataLoader(val_data, batch_size=cfg.TRAIN.BATCH_SIZE, shuffle=True, num_workers=cfg.TRAIN.NUM_WORKERS)
@@ -138,6 +138,7 @@ def main(args):
 def validation(val_loader, model, device, metrics, epoch, results_path, save_num):
     model.eval()
     print("======================evaluation======================")
+    save_count = 0
     for i, (image, target, audio_1, audio_2) in enumerate(tqdm(val_loader)):
         with torch.no_grad():
             image = image.to(device, dtype=torch.float32)
@@ -150,7 +151,7 @@ def validation(val_loader, model, device, metrics, epoch, results_path, save_num
 
             metrics.update(target, pred_label)
 
-            save_count = 0
+            
             if save_num != 0 and i % (len(val_loader) // save_num) == 0:
                     image_save = image[0].detach().cpu().numpy()
                     target_save = target[0].cpu().numpy()

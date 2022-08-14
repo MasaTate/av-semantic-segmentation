@@ -171,7 +171,7 @@ class SoundCityscapesDifferentFixedRotate(data.Dataset):
         self.rotate = rotate
         if self.rotate is not None:
             assert isinstance(self.rotate, int)
-            assert self.rotate <= 360 and self.rotate > 0
+            assert self.rotate <= 360 and self.rotate >= 0
         
 
     @classmethod
@@ -206,6 +206,7 @@ class SoundCityscapesDifferentFixedRotate(data.Dataset):
 
         target = self.encode_target(target)
         target[mask<128] = 0
+        target = torch.from_numpy(target)
         """
         if mode=='val':
             assert image.shape[-2] == 480
@@ -224,12 +225,12 @@ class SoundCityscapesDifferentFixedRotate(data.Dataset):
             height, width = image.shape[-2:]
             print("height:",height, "width:", width)
             x = int(width * self.rotate / 360)
-            image_rot = image.copy()
-            target_rot = target.copy()
-            mask_rot = mask.copy()
-            image_rot[:,:,0:width-x] = image[:,:,x:width,:]; image_rot[:,:,width-x:width,:] = image[:,:,0:x,:]
-            target_rot[:,:,0:width-x] = target[:,:,x:width,:]; target_rot[:,:,width-x:width,:] = target[:,:,0:x,:]
-            mask_rot[:,:,0:width-x] = mask[:,:,x:width,:]; mask_rot[:,:,width-x:width,:] = mask[:,:,0:x,:]
+            image_rot = image.clone()
+            target_rot = target.clone()
+            mask_rot = mask.clone()
+            image_rot[:,:,0:width-x] = image[:,:,x:width]; image_rot[:,:,width-x:width] = image[:,:,0:x]
+            target_rot[:,0:width-x] = target[:,x:width]; target_rot[:,width-x:width] = target[:,0:x]
+            mask_rot[:,0:width-x] = mask[:,x:width]; mask_rot[:,width-x:width] = mask[:,0:x]
             image = image_rot
             target = target_rot
             mask = mask_rot

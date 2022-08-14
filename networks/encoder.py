@@ -172,6 +172,7 @@ class singleAudioEncoder(nn.Module):
 
         self.aspp = _AtrousSpatialPyramidPoolingModule(512, 64, output_stride=8)
         self.post_us_audio1 = nn.Conv2d(512, 512, kernel_size=1, bias=False)
+        self.post_cat = nn.Conv2d(512, 512, kernel_size=1, bias=False)
         self.post_aspp = nn.Conv2d(320, 256, kernel_size=1, bias=False)
 
         initialize_weights(self.post_us_audio1)
