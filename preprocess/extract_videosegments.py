@@ -17,7 +17,7 @@ for sc in tqdm(range(1, 166)):
     out_fdir = args.out_dir + "/scene%04d/"%sc
     videonum = int(glob.glob(in_fdir+"/*cropped.mp4")[0].split('/')[-1].split('_')[1]);
     videofile="VIDEO_"+"%04d"%videonum+"_cropped.mp4"
-    save_dir = out_fdir + "split_videoframes_full/"
+    save_dir = out_fdir + "split_videoframes_big/"
     
     video_duration_float = float(ffmpeg.probe(in_fdir + videofile)['streams'][0]['duration'])
     video_duration = np.floor(video_duration_float)
@@ -33,4 +33,4 @@ for sc in tqdm(range(1, 166)):
 
     for t in tqdm(np.arange(1, audio_duration, 1)):
         save_path = save_dir+videofile[:-4]+"_%06d"%(t-1)+".png"
-        ffmpeg.input(in_fdir + videofile, ss=t).filter("scale", 1920, -1).output(save_path, vframes=1).run(quiet=True, overwrite_output=True)  
+        ffmpeg.input(in_fdir + videofile, ss=t).output(save_path, vframes=1).run(quiet=True, overwrite_output=True)  

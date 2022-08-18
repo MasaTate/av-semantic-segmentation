@@ -42,7 +42,7 @@ def make_dataset(root, mode, tracks=[3, 8]):
                 audioImg_path6 = os.path.join(root, img_dir_name, f'spectrograms_full/Track{int(tracks[0])}/')
             
             # semantic segmentation ground truth
-            mask_path = os.path.join(root, img_dir_name,'gtDLab/')
+            mask_path = os.path.join(root, img_dir_name,'gtDLab_full/')
             
             # sound making map
             binary_mask_path = os.path.join(root, img_dir_name,'binary_mask_full/')
@@ -220,6 +220,12 @@ class SoundCityscapesAuth(data.Dataset):
         spec_1 = np.load(spec_path_1)
         spec_2 = np.load(spec_path_2)
 
+        image.thumbnail([960, 1920], Image.ANTIALIAS)
+        target = np.arrray(target)
+        mask = np.array(mask)
+        target = target[::2,::2]
+        mask = mask[::2,::2]
+
         if self.transform:
             image, target, mask = self.transform(image, target, mask)
 
@@ -247,6 +253,7 @@ class SoundCityscapesAuth(data.Dataset):
         spec_2 = np.log(spec_2)
         spec_1 = np.expand_dims(spec_1, axis=0)
         spec_2 = np.expand_dims(spec_2, axis=0)
+        
         return image, target, torch.from_numpy(spec_1), torch.from_numpy(spec_2)
 
     def __len__(self):

@@ -144,7 +144,7 @@ def validation(val_loader, model, device, metrics, epoch, results_path, save_num
             target = target.to(device, dtype=torch.long)
             audio_1 = audio_1.to(device, dtype=torch.float32)
 
-            pred = model(audio_1, audio_2, target)
+            pred = model(audio_1, target)
             pred_label = pred.detach().max(dim=1)[1]
 
             metrics.update(target, pred_label)

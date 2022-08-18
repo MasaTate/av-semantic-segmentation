@@ -1,0 +1,35 @@
+CUDA:
+  USE_CUDA: True
+  CUDA_NUM: 7
+
+DATASET:
+  TYPE: "SingleCrop"
+  ROOT: "/work/masatate/dataset/dataset_public"
+  NUM_CLASSES: 19
+  TRACK: [8]
+  CHECK_TRACK: 3
+  ROTATE: None
+  CROP: True
+
+MODEL:
+  TYPE: "singleAudioToSeman"
+  PRETRAINED: None
+
+LOG:
+  DIR: "./logs_single_crop_8_front"
+  LOSS: 100
+  IMAGE: 3000
+
+RESULT:
+  PATH: "./result_single_crop_8_front"
+  SAVE_NUM: 3
+  WEIGHT_PATH: "./checkpoint_single_crop_8_front"
+  WEIGHT_ITER: 3000
+
+TRAIN:
+  LR: 0.00001
+  BATCH_SIZE: 2
+  NUM_WORKERS: 4
+  EPOCH_START: 0
+  EPOCH_END: 20
+  VAL_EPOCH: 2

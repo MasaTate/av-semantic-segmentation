@@ -223,7 +223,7 @@ class SoundCityscapesDifferentFixedRotate(data.Dataset):
         # left rotation
         if self.rotate is not None:
             height, width = image.shape[-2:]
-            print("height:",height, "width:", width)
+            #print("height:",height, "width:", width)
             x = int(width * self.rotate / 360)
             image_rot = image.clone()
             target_rot = target.clone()

@@ -38,7 +38,7 @@ def mask_color(bg):
     return mask
 
 
-for sc in tqdm(range(1, 166)):
+for sc in tqdm(range(1, 85)):
     fdir = args.root + "/scene%04d/"%sc
     videonum = int(glob.glob(fdir+"/*_bg.png")[0].split('/')[-1].split('_')[1])
     bg_file = "VIDEO_"+"%04d"%videonum+"_bg_seman.png"
@@ -48,13 +48,13 @@ for sc in tqdm(range(1, 166)):
     bg = cv2.imread(fdir+bg_file)
 
     height, width, _ = bg.shape
-    bg = cv2.resize(bg, (int(width*0.5), int(height*0.5)))
+    #bg = cv2.resize(bg, (int(width*0.5), int(height*0.5)))
     
     bg_mask = mask_color(bg)
     if not os.path.exists(savedir):
         os.makedirs(savedir)
     print("bg shape : ", bg.shape)
-    pred_path = sorted(glob.glob(fdir+"gtDLab/*_labelIds.png"))
+    pred_path = sorted(glob.glob(fdir+"gtDLab_full/*_labelIds.png"))
     for img_path in tqdm(pred_path):
         label = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE) 
         label_mask = np.full(label.shape, 0, dtype=np.uint8)
@@ -75,5 +75,5 @@ for sc in tqdm(range(1, 166)):
         mask = cv2.cvtColor(label_mask, cv2.COLOR_GRAY2BGR)
         prefix = img_path.split("/")[-1].split('.')[0].split('_')[0:4]
         save_name = "_".join(prefix) + "_mask.png"
-        cv2.imwrite(os.path.join(savedir, save_name), mask)        
+        cv2.imwrite(os.path.join(savedir, save_name), mask)
     
