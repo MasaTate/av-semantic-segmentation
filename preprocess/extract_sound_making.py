@@ -38,7 +38,7 @@ def mask_color(bg):
     return mask
 
 
-for sc in tqdm(range(1, 85)):
+for sc in tqdm(range(130, 166)):
     fdir = args.root + "/scene%04d/"%sc
     videonum = int(glob.glob(fdir+"/*_bg.png")[0].split('/')[-1].split('_')[1])
     bg_file = "VIDEO_"+"%04d"%videonum+"_bg_seman.png"

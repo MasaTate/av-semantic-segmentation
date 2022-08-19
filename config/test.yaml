@@ -1,13 +1,32 @@
 CUDA:
-  CUDA_NUM: 8
+  USE_CUDA: True
+  CUDA_NUM: 6
+
 DATASET:
   TYPE: "SoundCityscapesAuth"
+  ROOT: "/work/masatate/dataset/dataset_public"
+  NUM_CLASSES: 19
   TRACK: [1, 6]
 
 MODEL:
   TYPE: "audioToSeman"
-  PRETRAINED: "./checkpoint_auth/checkpoint_epoch8.pth"
+  PRETRAINED: "./checkpoint_auth/checkpoint_epoch19.pth"
+
+LOG:
+  DIR: "./logs_auth"
+  LOSS: 50
+  IMAGE: 200
 
 RESULT:
   PATH: "./result_auth"
   SAVE_NUM: 10
+  WEIGHT_PATH: "./checkpoint_auth"
+  WEIGHT_ITER: 800
+
+TRAIN:
+  LR: 0.00001
+  BATCH_SIZE: 2
+  NUM_WORKERS: 4
+  EPOCH_START: 0
+  EPOCH_END: 20
+  VAL_EPOCH: 2

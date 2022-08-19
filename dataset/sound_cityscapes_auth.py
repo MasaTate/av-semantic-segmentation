@@ -24,7 +24,7 @@ def make_dataset(root, mode, tracks=[3, 8]):
     """
     items = []
     audioDict=np.load(os.path.join(root, "SoundEnergy_165scenes_Track1.npy"), allow_pickle=True) #np.load('/'.join(root.split('/')[:-1])+"/SoundEnergy_165scenes_Track1.npy", allow_pickle=True)
-    assert (mode in ['train', 'val'])
+    assert (mode in ['train', 'val', 'test'])
     if mode == 'train':
         for sc in tqdm(range(1,115)):
             img_dir_name = 'scene%04d'%sc
@@ -88,34 +88,35 @@ def make_dataset(root, mode, tracks=[3, 8]):
                     item = (glob.glob(os.path.join(img_path, "*_"+it+".png"))[0], glob.glob(os.path.join(mask_path, "*"+it+seg_postfix))[0], glob.glob(os.path.join(binary_mask_path, "*"+it+mask_postfix))[0], os.path.join(audioImg_path, it+".npy"), os.path.join(audioImg_path6, it+".npy"), mode)
                     items.append(item)
 
-        if mode == 'test':
-            for sc in tqdm(range(140,166)):
-                img_dir_name = 'scene%04d'%sc
-                check_audioImg_path = os.path.join(root, img_dir_name, 'spectrograms_full/Track1/')
-                # image
-                img_path = os.path.join(root, img_dir_name,'split_videoframes_full/')
-                
-                # spectrogram
-                audioImg_path = os.path.join(root, img_dir_name, f'spectrograms_full/Track{int(tracks[1])}/')
-                audioImg_path6 = os.path.join(root, img_dir_name, f'spectrograms_full/Track{int(tracks[0])}/')
-                
-                # semantic segmentation ground truth
-                mask_path = os.path.join(root, img_dir_name,'gtDLab/')
-                
-                # sound making map
-                binary_mask_path = os.path.join(root, img_dir_name,'binary_mask_full/')
-                
-                seg_postfix = '_gtDLab_labelIds.png'
-                mask_postfix = '_mask.png'
-                for it_full in glob.glob(check_audioImg_path+"*.npy"):
-                    #print(it_full)
-                    it = it_full.split('/')[-1].split('.')[0]
-                    if it_full in audioDict.item()[sc]:
-                        assert len(glob.glob(os.path.join(img_path, "*_"+it+".png"))) == 1
-                        assert len(glob.glob(os.path.join(mask_path, "*"+it+seg_postfix))) == 1
-                        assert len(glob.glob(os.path.join(binary_mask_path, "*"+it+mask_postfix))) == 1
-                        item = (glob.glob(os.path.join(img_path, "*_"+it+".png"))[0], glob.glob(os.path.join(mask_path, "*"+it+seg_postfix))[0], glob.glob(os.path.join(binary_mask_path, "*"+it+mask_postfix))[0], os.path.join(audioImg_path, it+".npy"), os.path.join(audioImg_path6, it+".npy"), mode)
-                        items.append(item)
+    if mode == 'test':
+        for sc in tqdm(range(140,166)):
+            img_dir_name = 'scene%04d'%sc
+            check_audioImg_path = os.path.join(root, img_dir_name, 'spectrograms_full/Track1/')
+            
+            # image
+            img_path = os.path.join(root, img_dir_name,'split_videoframes_half/')
+            
+            # spectrogram
+            audioImg_path = os.path.join(root, img_dir_name, f'spectrograms_full/Track{int(tracks[1])}/')
+            audioImg_path6 = os.path.join(root, img_dir_name, f'spectrograms_full/Track{int(tracks[0])}/')
+            
+            # semantic segmentation ground truth
+            mask_path = os.path.join(root, img_dir_name,'gtDLab/')
+            
+            # sound making map
+            binary_mask_path = os.path.join(root, img_dir_name,'binary_mask_half/')
+            
+            seg_postfix = '_gtDLab_labelIds.png'
+            mask_postfix = '_mask.png'
+            for it_full in glob.glob(check_audioImg_path+"*.npy"):
+                #print(it_full)
+                it = it_full.split('/')[-1].split('.')[0]
+                if it_full in audioDict.item()[sc]:
+                    assert len(glob.glob(os.path.join(img_path, "*_"+it+".png"))) == 1
+                    assert len(glob.glob(os.path.join(mask_path, "*"+it+seg_postfix))) == 1
+                    assert len(glob.glob(os.path.join(binary_mask_path, "*"+it+mask_postfix))) == 1
+                    item = (glob.glob(os.path.join(img_path, "*_"+it+".png"))[0], glob.glob(os.path.join(mask_path, "*"+it+seg_postfix))[0], glob.glob(os.path.join(binary_mask_path, "*"+it+mask_postfix))[0], os.path.join(audioImg_path, it+".npy"), os.path.join(audioImg_path6, it+".npy"), mode)
+                    items.append(item)
 
     return items
 
@@ -185,7 +186,7 @@ class SoundCityscapesAuth(data.Dataset):
         if split not in ['train', 'test', 'val']:
             raise ValueError('Invalid split for mode! Please use split="train", split="test"'
                              ' or split="val"')
-    
+
         self.root = os.path.expanduser(root)
         self.transform = transform
         self.items = make_dataset(root, split, sound_track)
@@ -220,11 +221,13 @@ class SoundCityscapesAuth(data.Dataset):
         spec_1 = np.load(spec_path_1)
         spec_2 = np.load(spec_path_2)
 
+        """TODO
         image.thumbnail([960, 1920], Image.ANTIALIAS)
         target = np.arrray(target)
         mask = np.array(mask)
         target = target[::2,::2]
         mask = mask[::2,::2]
+        """
 
         if self.transform:
             image, target, mask = self.transform(image, target, mask)

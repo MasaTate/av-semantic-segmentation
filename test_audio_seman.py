@@ -14,6 +14,7 @@ import os
 from tqdm import tqdm
 from PIL import Image
 import loss as Loss
+import argparse
 
 def load_config(config_path=None):
     cfg = get_cfg_defaults()
@@ -23,7 +24,7 @@ def load_config(config_path=None):
 
     return cfg
 
-def main():
+def main(args):
     cfg = load_config("./config/test.yaml")
     # device
     device = torch.device('cuda:'+str(cfg.CUDA.CUDA_NUM) if torch.cuda.is_available() and cfg.CUDA.USE_CUDA==True else 'cpu')
@@ -32,7 +33,7 @@ def main():
     # prepare dataset
     print("loading dataset...")
     test_transforms = vt.PairCompose([vt.PairToTensor()])
-    test_data = dataset.get_dataset(type=cfg.DATASET.TYPE, root=cfg.DATASET.ROOT, split='val', transform=test_transforms, sound_track=cfg.DATASET.TRACK)
+    test_data = dataset.get_dataset(type=cfg.DATASET.TYPE, root=cfg.DATASET.ROOT, split='test', transform=test_transforms, sound_track=cfg.DATASET.TRACK)
 
     test_loader = DataLoader(test_data, batch_size=cfg.TRAIN.BATCH_SIZE, num_workers=cfg.TRAIN.NUM_WORKERS)
 
@@ -50,11 +51,11 @@ def main():
         print("created : "+cfg.RESULT.PATH)
     metrics = SegMetrics(cfg.DATASET.NUM_CLASSES, device)
 
-    score = validation(test_loader, model, device, metrics, cfg.RESULT.PATH, cfg.RESULT.SAVE_NUM)
+    score = validation(test_loader, model, device, metrics, cfg.RESULT.PATH, cfg.RESULT.SAVE_NUM, args)
     print(score)
 
 
-def validation(val_loader, model, device, metrics, results_path, save_num):
+def validation(val_loader, model, device, metrics, results_path, save_num, args):
     model.eval()
     print("======================evaluation======================")
     save_count = 0
@@ -67,6 +68,10 @@ def validation(val_loader, model, device, metrics, results_path, save_num):
 
             pred = model(audio_1, audio_2, target)
             pred_label = pred.detach().max(dim=1)[1]
+            if args.crop == True:
+                print("crop")
+                pred_label = pred_label[:,240:1680,:]
+                target = target[:,240:1680,:]
 
             metrics.update(target, pred_label)
 
@@ -80,9 +85,9 @@ def validation(val_loader, model, device, metrics, results_path, save_num):
                     target_save = val_loader.dataset.decode_target(target_save).astype(np.uint8)
                     pred_save = val_loader.dataset.decode_target(pred_save).astype(np.uint8)
                     
-                    Image.fromarray(image_save).save(results_path+"/image_{}.png".format(save_count))
-                    Image.fromarray(target_save).save(results_path+"/label_{}.png".format(save_count))
-                    Image.fromarray(pred_save).save(results_path+"/predict_{}.png".format(save_count))
+                    Image.fromarray(image_save).save(results_path+"/test_image_{}.png".format(save_count))
+                    Image.fromarray(target_save).save(results_path+"/test_label_{}.png".format(save_count))
+                    Image.fromarray(pred_save).save(results_path+"/test_predict_{}.png".format(save_count))
                     
                     save_count += 1
             
@@ -93,4 +98,9 @@ def validation(val_loader, model, device, metrics, results_path, save_num):
     return score
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("--crop", help="test only center region", action='store_true')
+
+    args = parser.parse_args()
+    main(args)
