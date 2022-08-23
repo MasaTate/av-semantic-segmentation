@@ -24,6 +24,7 @@ def make_dataset(root, mode, tracks=[3, 8]):
     """
     items = []
     audioDict=np.load(os.path.join(root, "SoundEnergy_165scenes_Track1.npy"), allow_pickle=True) #np.load('/'.join(root.split('/')[:-1])+"/SoundEnergy_165scenes_Track1.npy", allow_pickle=True)
+    maskDict=np.load(os.path.join(root, "MaskArea_165scenes_5percent.npy"), allow_pickle=True)
     assert (mode in ['train', 'val', 'test'])
     if mode == 'train':
         for sc in tqdm(range(1,115)):
@@ -120,7 +121,7 @@ def make_dataset(root, mode, tracks=[3, 8]):
 
     return items
 
-class SoundCityscapesAuth(data.Dataset):
+class SoundCityscapesAuthThres(data.Dataset):
     """Cityscapes <http://www.cityscapes-dataset.com/> Dataset.
     
     **Parameters:**

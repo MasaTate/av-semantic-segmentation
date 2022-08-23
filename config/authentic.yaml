@@ -13,14 +13,14 @@ MODEL:
   PRETRAINED: None
 
 LOG:
-  DIR: "./logs_auth"
+  DIR: "./logs_auth_full"
   LOSS: 50
   IMAGE: 200
 
 RESULT:
-  PATH: "./result_auth"
+  PATH: "./result_auth_full"
   SAVE_NUM: 3
-  WEIGHT_PATH: "./checkpoint_auth"
+  WEIGHT_PATH: "./checkpoint_auth_full"
   WEIGHT_ITER: 800
 
 TRAIN:
