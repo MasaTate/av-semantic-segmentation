@@ -12,7 +12,7 @@ from tqdm import tqdm
 parser = argparse.ArgumentParser()
 parser.add_argument("--in_dir",default=".",help="dataset input root directory")
 parser.add_argument("--out_dir",help="dataset output root directory")
-parser.add_argument("--tracks", default=[7, 8], help="input track list")
+parser.add_argument("--tracks", default=[1, 2, 3, 4, 5, 6, 7, 8], help="input track list")
 args = parser.parse_args()
 
 # length of data to read.
