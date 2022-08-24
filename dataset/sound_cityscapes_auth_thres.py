@@ -54,11 +54,13 @@ def make_dataset(root, mode, tracks=[3, 8]):
                 #print(it_full)
                 it = it_full.split('/')[-1].split('.')[0]
                 if it_full in audioDict.item()[sc]:
-                    assert len(glob.glob(os.path.join(img_path, "*_"+it+".png"))) == 1
-                    assert len(glob.glob(os.path.join(mask_path, "*"+it+seg_postfix))) == 1
-                    assert len(glob.glob(os.path.join(binary_mask_path, "*"+it+mask_postfix))) == 1
-                    item = (glob.glob(os.path.join(img_path, "*_"+it+".png"))[0], glob.glob(os.path.join(mask_path, "*"+it+seg_postfix))[0], glob.glob(os.path.join(binary_mask_path, "*"+it+mask_postfix))[0], os.path.join(audioImg_path, it+".npy"), os.path.join(audioImg_path6, it+".npy"), mode)
-                    items.append(item)
+                    binary_mask_full = glob.glob(os.path.join(binary_mask_path, "*"+it+mask_postfix))[0]
+                    if binary_mask_full in maskDict.item()[sc]:
+                        assert len(glob.glob(os.path.join(img_path, "*_"+it+".png"))) == 1
+                        assert len(glob.glob(os.path.join(mask_path, "*"+it+seg_postfix))) == 1
+                        assert len(glob.glob(os.path.join(binary_mask_path, "*"+it+mask_postfix))) == 1
+                        item = (glob.glob(os.path.join(img_path, "*_"+it+".png"))[0], glob.glob(os.path.join(mask_path, "*"+it+seg_postfix))[0], glob.glob(os.path.join(binary_mask_path, "*"+it+mask_postfix))[0], os.path.join(audioImg_path, it+".npy"), os.path.join(audioImg_path6, it+".npy"), mode)
+                        items.append(item)
 
     if mode == 'val':
         for sc in tqdm(range(115,140)):
@@ -80,14 +82,15 @@ def make_dataset(root, mode, tracks=[3, 8]):
             seg_postfix = '_gtDLab_labelIds.png'
             mask_postfix = '_mask.png'
             for it_full in glob.glob(check_audioImg_path+"*.npy"):
-                #print(it_full)
                 it = it_full.split('/')[-1].split('.')[0]
                 if it_full in audioDict.item()[sc]:
-                    assert len(glob.glob(os.path.join(img_path, "*_"+it+".png"))) == 1
-                    assert len(glob.glob(os.path.join(mask_path, "*"+it+seg_postfix))) == 1
-                    assert len(glob.glob(os.path.join(binary_mask_path, "*"+it+mask_postfix))) == 1
-                    item = (glob.glob(os.path.join(img_path, "*_"+it+".png"))[0], glob.glob(os.path.join(mask_path, "*"+it+seg_postfix))[0], glob.glob(os.path.join(binary_mask_path, "*"+it+mask_postfix))[0], os.path.join(audioImg_path, it+".npy"), os.path.join(audioImg_path6, it+".npy"), mode)
-                    items.append(item)
+                    binary_mask_full = glob.glob(os.path.join(binary_mask_path, "*"+it+mask_postfix))[0]
+                    if binary_mask_full in maskDict.item()[sc]:
+                        assert len(glob.glob(os.path.join(img_path, "*_"+it+".png"))) == 1
+                        assert len(glob.glob(os.path.join(mask_path, "*"+it+seg_postfix))) == 1
+                        assert len(glob.glob(os.path.join(binary_mask_path, "*"+it+mask_postfix))) == 1
+                        item = (glob.glob(os.path.join(img_path, "*_"+it+".png"))[0], glob.glob(os.path.join(mask_path, "*"+it+seg_postfix))[0], glob.glob(os.path.join(binary_mask_path, "*"+it+mask_postfix))[0], os.path.join(audioImg_path, it+".npy"), os.path.join(audioImg_path6, it+".npy"), mode)
+                        items.append(item)
 
     if mode == 'test':
         for sc in tqdm(range(140,166)):
